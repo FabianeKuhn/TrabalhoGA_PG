@@ -4,6 +4,8 @@
 static bool keys[1024];
 static bool resized;
 static GLuint width, height;
+float xPosition;
+float yPosition;
 
 SceneManager::SceneManager()
 {
@@ -92,6 +94,17 @@ void SceneManager::do_movement()
 	if (keys[GLFW_KEY_ESCAPE])
 		glfwSetWindowShouldClose(window, GL_TRUE);
 
+	if (keys[GLFW_KEY_RIGHT] || keys[GLFW_KEY_D])
+		xPosition += 0.05;
+
+	if (keys[GLFW_KEY_LEFT] || keys[GLFW_KEY_A])
+		xPosition -= 0.05;
+
+	if (keys[GLFW_KEY_UP] || keys[GLFW_KEY_W])
+		yPosition += 0.05;
+
+	if (keys[GLFW_KEY_DOWN] || keys[GLFW_KEY_S])
+		yPosition -= 0.05;
 }
 
 void SceneManager::render()
@@ -106,12 +119,15 @@ void SceneManager::render()
 	// Create transformations 
 	model = glm::mat4();
 	model = glm::rotate(model, (GLfloat)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+	glm::mat4 transform = glm::mat4(1.0f); // initializing identity matrix
+
+	transform = glm::translate(transform, glm::vec3(xPosition, yPosition, 0.0f));
 
 	// Get their uniform location
 	GLint modelLoc = glGetUniformLocation(shader->Program, "model");
 
 	// Pass them to the shaders
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
 	if (resized) //se houve redimensionamento na janela, redefine a projection matrix
 	{
