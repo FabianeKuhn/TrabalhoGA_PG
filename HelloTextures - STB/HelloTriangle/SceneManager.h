@@ -26,6 +26,7 @@ public:
 	void render();
 	void run();
 	void finish();
+	void endGame();
 
 
 	// scene

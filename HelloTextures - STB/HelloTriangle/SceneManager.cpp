@@ -88,6 +88,15 @@ void SceneManager::resize(GLFWwindow * window, int w, int h)
 	glViewport(0, 0, width, height);
 }
 
+void SceneManager::endGame() {
+	if (xPosition >= 1 || xPosition <= -1) {
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+
+	if (yPosition >= 1 || yPosition <= -1) {
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+}
 
 void SceneManager::do_movement()
 {
@@ -164,6 +173,8 @@ void SceneManager::run()
 		
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
+
+		endGame();
 	}
 }
 
