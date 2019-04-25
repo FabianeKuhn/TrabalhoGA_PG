@@ -104,16 +104,16 @@ void SceneManager::do_movement()
 		glfwSetWindowShouldClose(window, GL_TRUE);
 
 	if (keys[GLFW_KEY_RIGHT] || keys[GLFW_KEY_D])
-		xPosition += 0.05;
+		xPosition += 0.0005;
 
 	if (keys[GLFW_KEY_LEFT] || keys[GLFW_KEY_A])
-		xPosition -= 0.05;
+		xPosition -= 0.0005;
 
 	if (keys[GLFW_KEY_UP] || keys[GLFW_KEY_W])
-		yPosition += 0.05;
+		yPosition += 0.0005;
 
 	if (keys[GLFW_KEY_DOWN] || keys[GLFW_KEY_S])
-		yPosition -= 0.05;
+		yPosition -= 0.0005;
 }
 
 void SceneManager::render()
@@ -147,12 +147,25 @@ void SceneManager::render()
 	// bind Texture
 	// Bind Textures using texture units
 	
-	glBindTexture(GL_TEXTURE_2D, texture);
+	glBindTexture(GL_TEXTURE_2D, texture[0]);
 	glUniform1i(glGetUniformLocation(shader->Program, "ourTexture1"), 0);
 
     // render container
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+	glBindTexture(GL_TEXTURE_2D, texture[1]);
+	glUniform1i(glGetUniformLocation(shader->Program, "ourTexture1"), 0);
+
+	transform = glm::mat4(1.0f);
+	transform = glm::translate(transform, glm::vec3(0.5f, 0.0f, 0.0f));
+
+	modelLoc = glGetUniformLocation(shader->Program, "model");
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
+	
+	// render container
+	glBindVertexArray(VAO);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 }
 
@@ -251,36 +264,42 @@ void SceneManager::setupCamera2D()
 void SceneManager::setupTexture()
 {
 
-	// load and create a texture 
-	// -------------------------
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-										   // set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glGenTextures(2, texture);
 
-	// load image, create texture and generate mipmaps
-	int width, height, nrChannels;
-	//unsigned char *data = SOIL_load_image("../textures/wall.jpg", &width, &height, 0, SOIL_LOAD_RGB);
-	unsigned char *data = stbi_load("../textures/box2.png", &width, &height, &nrChannels, 0);
-	
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
+	for (int i = 0; i < 2; i++) {
+
+		// load and create a texture 
+		// -------------------------
+		glBindTexture(GL_TEXTURE_2D, texture[i]); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+											   // set the texture wrapping parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		// set texture filtering parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		// load image, create texture and generate mipmaps
+		int width, height, nrChannels;
+		unsigned char *data;
+		//unsigned char *data = SOIL_load_image("../textures/wall.jpg", &width, &height, 0, SOIL_LOAD_RGB);
+		if (i == 0) {
+			data = stbi_load("../textures/box2.png", &width, &height, &nrChannels, 0);
+		}
+		else {
+			data = stbi_load("../textures/yoshi.png", &width, &height, &nrChannels, 0);
+		}
+		
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
+		else
+		{
+			std::cout << "Failed to load texture" << std::endl;
+		}
+		stbi_image_free(data);
 	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-
-	glBindTexture(GL_TEXTURE_2D, 0); // Unbind texture when done, so we won't accidentily mess up our texture.
-
-	glActiveTexture(GL_TEXTURE0);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

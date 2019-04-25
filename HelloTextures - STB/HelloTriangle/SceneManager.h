@@ -51,7 +51,7 @@ private:
 	glm::mat4 projection;
 
 	//Texture index
-	unsigned int texture;
+	unsigned int texture[];
 
 };
 
