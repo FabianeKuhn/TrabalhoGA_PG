@@ -118,6 +118,9 @@ void SceneManager::do_movement()
 
 void SceneManager::render()
 {
+
+	//Passar para o sprite_renderer com parametros de &texture, glm::vec2 position, glm::vec2 size, GLfloat rotate, glm::vec3 color
+
 	// Clear the colorbuffer
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -200,6 +203,11 @@ void SceneManager::finish()
 
 void SceneManager::setupScene()
 {
+
+	//Passar para o sprite_renderer essa inicialização dos vertices
+
+
+
 	// set up vertex data (and buffer(s)) and configure vertex attributes
 	// ------------------------------------------------------------------
 	float vertices[] = {
@@ -266,41 +274,13 @@ void SceneManager::setupTexture()
 
 	glGenTextures(2, texture);
 
+	//Criar pathTexture como matriz, do mesmo tamanho do texture. Cada posição será o path de uma textura
+
 	for (int i = 0; i < 2; i++) {
+		//Ver como chamar o método da classe Sprite_renderer
+		SetupTexture(texture[i], pathTexture);
 
-		// load and create a texture 
-		// -------------------------
-		glBindTexture(GL_TEXTURE_2D, texture[i]); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-											   // set the texture wrapping parameters
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		// set texture filtering parameters
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		// load image, create texture and generate mipmaps
-		int width, height, nrChannels;
-		unsigned char *data;
-		//unsigned char *data = SOIL_load_image("../textures/wall.jpg", &width, &height, 0, SOIL_LOAD_RGB);
-		if (i == 0) {
-			data = stbi_load("../textures/box2.png", &width, &height, &nrChannels, 0);
-		}
-		else {
-			data = stbi_load("../textures/yoshi.png", &width, &height, &nrChannels, 0);
-		}
-		
-		if (data)
-		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-			glGenerateMipmap(GL_TEXTURE_2D);
-		}
-		else
-		{
-			std::cout << "Failed to load texture" << std::endl;
-		}
-		stbi_image_free(data);
 	}
-
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }

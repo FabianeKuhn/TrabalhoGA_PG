@@ -106,5 +106,15 @@ public:
 	{
 		glUseProgram(this->Program);
 	}
+
+	void setMat4(const std::string &name, const glm::mat4 &mat) const
+	{
+		glUniformMatrix4fv(glGetUniformLocation(Program, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+	}
+
+	void setVec3(const std::string &name, const glm::vec3 &value) const
+	{
+		glUniform3fv(glGetUniformLocation(Program, name.c_str()), 1, &value[0]);
+	}
 };
 
