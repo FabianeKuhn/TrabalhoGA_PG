@@ -1,9 +1,10 @@
 /* Hello Transforms - código inicial fornecido em https://learnopengl.com/#!Getting-started/Hello-Triangle 
  *
  * Adaptado por Rossana Baptista Queiroz
- * para a disciplina de Computação Gráfica - Jogos Digitais - Unisinos
- * Versão inicial: 7/4/2017
- * Última atualização em 14/03/2018
+ * Lista 4 - Fabiane Kuhn
+ * para a disciplina de Processamento Gráfico
+ * Versão inicial: 30/05/2019
+ * Última atualização em 30/05/2019
  *
  */
 

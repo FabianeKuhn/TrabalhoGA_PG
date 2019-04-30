@@ -22,6 +22,10 @@ public:
 	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 	static void resize(GLFWwindow* window, int width, int height);
 
+	glm::mat4 updateTransform(float x, float y, float z, float scale = 1.0f, float rotate = 0);
+	void drawRoad(glm::mat4 transform);
+	void drawGrassRoad(glm::mat4 transform);
+	void drawTrees(glm::mat4 transform);
 	void do_movement();
 	void render();
 	void run();

@@ -31,7 +31,7 @@ void SceneManager::initializeGraphics()
 	glfwInit();
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	window = glfwCreateWindow(width, height, "Hello Transform", nullptr, nullptr);
+	window = glfwCreateWindow(width, height, "Lista 4", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 
 	// Set the required callback functions
@@ -118,9 +118,6 @@ void SceneManager::do_movement()
 
 void SceneManager::render()
 {
-
-	//Passar para o sprite_renderer com parametros de &texture, glm::vec2 position, glm::vec2 size, GLfloat rotate, glm::vec3 color
-
 	// Clear the colorbuffer
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -131,6 +128,7 @@ void SceneManager::render()
 	// Create transformations 
 	model = glm::mat4();
 	model = glm::rotate(model, (GLfloat)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
 	glm::mat4 transform = glm::mat4(1.0f); // initializing identity matrix
 
 	transform = glm::translate(transform, glm::vec3(xPosition, yPosition, 0.0f));
@@ -147,28 +145,111 @@ void SceneManager::render()
 		resized = false;
 	}
 
+	drawGrassRoad(transform);
+	drawRoad(transform);
+	drawTrees(transform);
+
+
+}
+
+void SceneManager::drawRoad(glm::mat4 transform){
+	GLint modelLoc;
+
 	// bind Texture
 	// Bind Textures using texture units
-	
-	glBindTexture(GL_TEXTURE_2D, texture[0]);
+
+	glBindTexture(GL_TEXTURE_2D, texture[2]);
 	glUniform1i(glGetUniformLocation(shader->Program, "ourTexture1"), 0);
 
-    // render container
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	for (float i = -1.0f; i < 2.0f; i++)
+	{
+		transform = updateTransform(float(i), 0.0f, 0.0f, 1.3f);
+
+		modelLoc = glGetUniformLocation(shader->Program, "model");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+		// render container
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	}
+}
+
+void SceneManager::drawGrassRoad(glm::mat4 transform)
+{
+	GLint modelLoc;
+
+	// bind Texture
+	// Bind Textures using texture units
 
 	glBindTexture(GL_TEXTURE_2D, texture[1]);
 	glUniform1i(glGetUniformLocation(shader->Program, "ourTexture1"), 0);
 
-	transform = glm::mat4(1.0f);
-	transform = glm::translate(transform, glm::vec3(0.5f, 0.0f, 0.0f));
+	for (float i = -4.0f; i < 4; i += 1.00f)
+	{
+		transform = updateTransform(float(i), 1.0f, 0.0f, 0.7f);
 
-	modelLoc = glGetUniformLocation(shader->Program, "model");
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
+		modelLoc = glGetUniformLocation(shader->Program, "model");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+		// render container
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		transform = updateTransform(float(i), 1.0f, 0.0f, 0.7f, glm::radians(180.0f));
+
+		modelLoc = glGetUniformLocation(shader->Program, "model");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+		// render container
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	}
+};
+
+void SceneManager::drawTrees(glm::mat4 transform)
+{
+	GLint modelLoc;
+
+	// bind Texture
+	// Bind Textures using texture units
+
+	glBindTexture(GL_TEXTURE_2D, texture[0]);
+	glUniform1i(glGetUniformLocation(shader->Program, "ourTexture1"), 0);
+
+	for (float i = -4.5f; i < 4.5f; i+=1.25f)
+	{
+		transform = updateTransform(float(i), 3.5f, 0.0f, 0.25f);
+
+		modelLoc = glGetUniformLocation(shader->Program, "model");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+		// render container
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		transform = updateTransform(float(i), -3.5f, 0.0f, 0.25f);
+
+		modelLoc = glGetUniformLocation(shader->Program, "model");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+		// render container
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	}
+};
+
+glm::mat4 SceneManager::updateTransform(float x, float y, float z, float scale, float rotate)
+{
+	glm::vec3 pivot = glm::vec3(0.5f, 0.5f, 0.0f);
+	glm::mat4 transUpdate = glm::mat4(1.0f);
+	transUpdate = glm::rotate(transUpdate, rotate, glm::vec3(0.0f, 0.0f, 1.0f));
+	transUpdate = glm::scale(transUpdate, glm::vec3(scale));
+	transUpdate = glm::translate(transUpdate, glm::vec3(x, y, z));
+
 	
-	// render container
-	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+	return transUpdate;
+
 
 }
 
@@ -203,25 +284,21 @@ void SceneManager::finish()
 
 void SceneManager::setupScene()
 {
-
-	//Passar para o sprite_renderer essa inicialização dos vertices
-
-
-
 	// set up vertex data (and buffer(s)) and configure vertex attributes
 	// ------------------------------------------------------------------
 	float vertices[] = {
 		// positions          // colors           // texture coords
-		0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0, // top right
-		0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-		-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-		-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0  // top left 
+		0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0, // top right
+		0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+		-0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0  // top left 
 	};
+
 	unsigned int indices[] = {
 		0, 1, 3, // first triangle
 		1, 2, 3  // second triangle
 	};
-	unsigned int VBO, EBO;
+	unsigned int VBO, EBO, RBO;
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
@@ -272,15 +349,46 @@ void SceneManager::setupCamera2D()
 void SceneManager::setupTexture()
 {
 
-	glGenTextures(2, texture);
+	glGenTextures(3, texture);
 
-	//Criar pathTexture como matriz, do mesmo tamanho do texture. Cada posição será o path de uma textura
+	for (int i = 0; i < 3; i++) {
 
-	for (int i = 0; i < 2; i++) {
-		//Ver como chamar o método da classe Sprite_renderer
-		SetupTexture(texture[i], pathTexture);
+		// load and create a texture 
+		// -------------------------
+		glBindTexture(GL_TEXTURE_2D, texture[i]); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+											   // set the texture wrapping parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		// set texture filtering parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+		// load image, create texture and generate mipmaps
+		int width, height, nrChannels;
+		unsigned char *data;
+		//unsigned char *data = SOIL_load_image("../textures/wall.jpg", &width, &height, 0, SOIL_LOAD_RGB);
+		if (i == 0) {
+			data = stbi_load("../textures/tree.png", &width, &height, &nrChannels, 0);
+		}
+		else if (i == 2) {
+			data = stbi_load("../textures/road.png", &width, &height, &nrChannels, 0);
+		}
+		else {
+			data = stbi_load("../textures/grass.png", &width, &height, &nrChannels, 0);
+		}
+		
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
+		else
+		{
+			std::cout << "Failed to load texture" << std::endl;
+		}
+		stbi_image_free(data);
 	}
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
