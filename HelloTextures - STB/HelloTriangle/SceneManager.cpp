@@ -4,8 +4,13 @@
 static bool keys[1024];
 static bool resized;
 static GLuint width, height;
-float xPosition;
-float yPosition;
+float xPosition = 0;
+float yPosition = 0;
+float velocity = 0.01;
+float roadPositions[] = {-2, -1, 0, 1, 2};
+float grassPositions[] = { -4, -3, -2, -1, 0, 1, 2, 3 };
+float treesPositions[] = {-7.5, -6.25 ,-5, -3.75, -2.5, -1.25, 0, 1.25, 2.5, 3.75, 5, 6.25, 7.5};
+float birdPosition = -5;
 
 SceneManager::SceneManager()
 {
@@ -89,13 +94,13 @@ void SceneManager::resize(GLFWwindow * window, int w, int h)
 }
 
 void SceneManager::endGame() {
-	if (xPosition >= 1 || xPosition <= -1) {
-		glfwSetWindowShouldClose(window, GL_TRUE);
-	}
+//	if (xPosition >= 1 || xPosition <= -1) {
+	//	glfwSetWindowShouldClose(window, GL_TRUE);
+//	}
 
-	if (yPosition >= 1 || yPosition <= -1) {
-		glfwSetWindowShouldClose(window, GL_TRUE);
-	}
+//if (yPosition >= 1 || yPosition <= -1) {
+	//	glfwSetWindowShouldClose(window, GL_TRUE);
+//	}
 }
 
 void SceneManager::do_movement()
@@ -109,11 +114,13 @@ void SceneManager::do_movement()
 	if (keys[GLFW_KEY_LEFT] || keys[GLFW_KEY_A])
 		xPosition -= 0.0005;
 
-	if (keys[GLFW_KEY_UP] || keys[GLFW_KEY_W])
-		yPosition += 0.0005;
-
+	if (keys[GLFW_KEY_UP] || keys[GLFW_KEY_W]) 
+		yPosition += 0.05;
+	
 	if (keys[GLFW_KEY_DOWN] || keys[GLFW_KEY_S])
-		yPosition -= 0.0005;
+		yPosition -= 0.05;
+
+	
 }
 
 void SceneManager::render()
@@ -148,6 +155,8 @@ void SceneManager::render()
 	drawGrassRoad(transform);
 	drawRoad(transform);
 	drawTrees(transform);
+	drawCar(transform);
+	//drawBird(transform);		//nao funcional ainda
 
 
 }
@@ -161,17 +170,23 @@ void SceneManager::drawRoad(glm::mat4 transform){
 	glBindTexture(GL_TEXTURE_2D, texture[2]);
 	glUniform1i(glGetUniformLocation(shader->Program, "ourTexture1"), 0);
 
-	for (float i = -1.0f; i < 2.0f; i++)
-	{
-		transform = updateTransform(float(i), 0.0f, 0.0f, 1.3f);
+	for (int i = 0; i < 5; i++) {
+		transform = updateTransform(roadPositions[i], 0.0f, 0.0f, 1.3f);
 
 		modelLoc = glGetUniformLocation(shader->Program, "model");
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
-		// render container
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		roadPositions[i] -= velocity;
+
+		if (roadPositions[i] < -2) {
+			roadPositions[i] = 2;
+		}
+
 	}
+
 }
 
 void SceneManager::drawGrassRoad(glm::mat4 transform)
@@ -184,27 +199,81 @@ void SceneManager::drawGrassRoad(glm::mat4 transform)
 	glBindTexture(GL_TEXTURE_2D, texture[1]);
 	glUniform1i(glGetUniformLocation(shader->Program, "ourTexture1"), 0);
 
-	for (float i = -4.0f; i < 4; i += 1.00f)
-	{
-		transform = updateTransform(float(i), 1.0f, 0.0f, 0.7f);
+
+	for (int i = 0; i < 8; i++) {
+		transform = updateTransform(grassPositions[i], 1.0f, 0.0f, 0.7f);
+		modelLoc = glGetUniformLocation(shader->Program, "model");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		transform = updateTransform(-grassPositions[i], 1.0f, 0.0f, 0.7f, glm::radians(180.0f));
 
 		modelLoc = glGetUniformLocation(shader->Program, "model");
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
-		// render container
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-		transform = updateTransform(float(i), 1.0f, 0.0f, 0.7f, glm::radians(180.0f));
+		grassPositions[i] -= velocity;
 
-		modelLoc = glGetUniformLocation(shader->Program, "model");
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
+		if (grassPositions[i] < -4) {
+			grassPositions[i] = 3;
+		}
 
-		// render container
-		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	}
+
 };
+
+void SceneManager::drawCar(glm::mat4 transform) {
+
+	GLint modelLoc;
+
+	// bind Texture
+	// Bind Textures using texture units
+
+	glBindTexture(GL_TEXTURE_2D, texture[3]);
+	glUniform1i(glGetUniformLocation(shader->Program, "ourTexture1"), 0);
+
+	transform = updateTransform(-2.5, yPosition, 0.0f, 0.25f);
+
+	modelLoc = glGetUniformLocation(shader->Program, "model");
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+	// render container
+	glBindVertexArray(VAO);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+}
+
+void SceneManager::drawBird(glm::mat4 transform) {
+	GLint modelLoc;
+
+	// bind Texture
+	// Bind Textures using texture units
+
+	glBindTexture(GL_TEXTURE_2D, texture[4]);
+	glUniform1f(glGetUniformLocation(shader->Program, "offsetx"), 0.7);
+	glUniform1i(glGetUniformLocation(shader->Program, "ourTexture1"), 0);
+
+	transform = updateTransform(birdPosition, 2, 0.0f, 0.25f);
+
+	modelLoc = glGetUniformLocation(shader->Program, "model");
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+	// render container
+	glBindVertexArray(VAO);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+	birdPosition += 0.1;
+
+	if (birdPosition >= 10) {
+		birdPosition = -5;
+	}
+
+
+}
 
 void SceneManager::drawTrees(glm::mat4 transform)
 {
@@ -216,9 +285,9 @@ void SceneManager::drawTrees(glm::mat4 transform)
 	glBindTexture(GL_TEXTURE_2D, texture[0]);
 	glUniform1i(glGetUniformLocation(shader->Program, "ourTexture1"), 0);
 
-	for (float i = -4.5f; i < 4.5f; i+=1.25f)
+	for (int i = 0; i < 14; i++)
 	{
-		transform = updateTransform(float(i), 3.5f, 0.0f, 0.25f);
+		transform = updateTransform(treesPositions[i], 3.5f, 0.0f, 0.25f);
 
 		modelLoc = glGetUniformLocation(shader->Program, "model");
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
@@ -227,7 +296,7 @@ void SceneManager::drawTrees(glm::mat4 transform)
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-		transform = updateTransform(float(i), -3.5f, 0.0f, 0.25f);
+		transform = updateTransform(treesPositions[i], -3.5f, 0.0f, 0.25f);
 
 		modelLoc = glGetUniformLocation(shader->Program, "model");
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
@@ -235,7 +304,15 @@ void SceneManager::drawTrees(glm::mat4 transform)
 		// render container
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		treesPositions[i] -= velocity;
+
+		if (treesPositions[i] < -8) {
+			treesPositions[i] = 8;
+		}
+
 	}
+
 };
 
 glm::mat4 SceneManager::updateTransform(float x, float y, float z, float scale, float rotate)
@@ -258,7 +335,6 @@ void SceneManager::run()
 	//GAME LOOP
 	while (!glfwWindowShouldClose(window))
 	{
-		
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
 
@@ -349,34 +425,51 @@ void SceneManager::setupCamera2D()
 void SceneManager::setupTexture()
 {
 
-	glGenTextures(3, texture);
+	glGenTextures(5, texture);
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 5; i++) {
 
 		// load and create a texture 
 		// -------------------------
 		glBindTexture(GL_TEXTURE_2D, texture[i]); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
 											   // set the texture wrapping parameters
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		// set texture filtering parameters
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		// load image, create texture and generate mipmaps
 		int width, height, nrChannels;
 		unsigned char *data;
 		//unsigned char *data = SOIL_load_image("../textures/wall.jpg", &width, &height, 0, SOIL_LOAD_RGB);
+
 		if (i == 0) {
 			data = stbi_load("../textures/tree.png", &width, &height, &nrChannels, 0);
 		}
+	
+		else if (i == 1) {
+			data = stbi_load("../textures/grass.png", &width, &height, &nrChannels, 0);
+		}
+
 		else if (i == 2) {
 			data = stbi_load("../textures/road.png", &width, &height, &nrChannels, 0);
 		}
+		
+		else if (i == 3){
+			data = stbi_load("../textures/car.png", &width, &height, &nrChannels, 0);
+		}
+
+		else if (i == 4){
+			data = stbi_load("../textures/bird2.png", &width, &height, &nrChannels, 0);
+		}
+
 		else {
-			data = stbi_load("../textures/grass.png", &width, &height, &nrChannels, 0);
+			data = stbi_load("../textures/obstaculo.png", &width, &height, &nrChannels, 0);
 		}
 		
+		cout << "width: " << width << ", height: " << height << "\n";
+
 		if (data)
 		{
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -389,6 +482,6 @@ void SceneManager::setupTexture()
 		stbi_image_free(data);
 	}
 
-	glEnable(GL_BLEND);
+	glEnable(GL_BLEND);   
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
