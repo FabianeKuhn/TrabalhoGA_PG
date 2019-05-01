@@ -28,6 +28,7 @@ public:
 	void drawTrees(glm::mat4 transform);
 	void drawCar(glm::mat4 transform);
 	void drawBird(glm::mat4 transform);
+	void drawObstacle(glm::mat4 transform);
 	void do_movement();
 	void render();
 	void run();

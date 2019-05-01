@@ -11,6 +11,12 @@ float roadPositions[] = {-2, -1, 0, 1, 2};
 float grassPositions[] = { -4, -3, -2, -1, 0, 1, 2, 3 };
 float treesPositions[] = {-7.5, -6.25 ,-5, -3.75, -2.5, -1.25, 0, 1.25, 2.5, 3.75, 5, 6.25, 7.5};
 float birdPosition = -5;
+float obstaclePositionX = 20;
+float obstaclePositionY = -0.8;
+float leftSideObstacleX = obstaclePositionX;
+float rightSideObstacleX = obstaclePositionX + .5;
+float topSideObstacleY = obstaclePositionY;
+float bottomSideObstacleY = obstaclePositionX;
 
 SceneManager::SceneManager()
 {
@@ -94,13 +100,11 @@ void SceneManager::resize(GLFWwindow * window, int w, int h)
 }
 
 void SceneManager::endGame() {
-//	if (xPosition >= 1 || xPosition <= -1) {
-	//	glfwSetWindowShouldClose(window, GL_TRUE);
-//	}
 
-//if (yPosition >= 1 || yPosition <= -1) {
-	//	glfwSetWindowShouldClose(window, GL_TRUE);
-//	}
+	if (xPosition <= rightSideObstacleX && xPosition >= leftSideObstacleX && yPosition >= bottomSideObstacleY && yPosition <= topSideObstacleY) {
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+
 }
 
 void SceneManager::do_movement()
@@ -108,17 +112,20 @@ void SceneManager::do_movement()
 	if (keys[GLFW_KEY_ESCAPE])
 		glfwSetWindowShouldClose(window, GL_TRUE);
 
-	if (keys[GLFW_KEY_RIGHT] || keys[GLFW_KEY_D])
-		xPosition += 0.0005;
+//	if (keys[GLFW_KEY_RIGHT] || keys[GLFW_KEY_D])
+	//	xPosition += 0.0005;
 
-	if (keys[GLFW_KEY_LEFT] || keys[GLFW_KEY_A])
-		xPosition -= 0.0005;
+//	if (keys[GLFW_KEY_LEFT] || keys[GLFW_KEY_A])
+//		xPosition -= 0.0005;
 
-	if (keys[GLFW_KEY_UP] || keys[GLFW_KEY_W]) 
-		yPosition += 0.05;
+	if (keys[GLFW_KEY_UP] || keys[GLFW_KEY_W]) {
+		if (yPosition + 0.1 <= 2)
+			yPosition += 0.1;
+	}
 	
 	if (keys[GLFW_KEY_DOWN] || keys[GLFW_KEY_S])
-		yPosition -= 0.05;
+		if (yPosition - 0.1 >= -2)
+			yPosition -= 0.1;
 
 	
 }
@@ -157,6 +164,39 @@ void SceneManager::render()
 	drawTrees(transform);
 	drawCar(transform);
 	//drawBird(transform);		//nao funcional ainda
+	drawObstacle(transform);
+}
+
+void SceneManager::drawObstacle(glm::mat4 transform) {
+
+	GLint modelLoc;
+
+	// bind Texture
+	// Bind Textures using texture units
+
+	glBindTexture(GL_TEXTURE, texture[5]);
+	glUniform1i(glGetUniformLocation(shader->Program, "ourTexture1"), 0);
+	
+	glTexParameteri(GL_TEXTURE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	transform = updateTransform(obstaclePositionX, obstaclePositionY, 0.0f, 0.5f);
+
+	modelLoc = glGetUniformLocation(shader->Program, "model");
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+	glBindVertexArray(VAO);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+	obstaclePositionX -= velocity*10;
+	rightSideObstacleX = obstaclePositionX + 2;
+	leftSideObstacleX = obstaclePositionX + .5;
+	bottomSideObstacleY = obstaclePositionY - .5;
+	topSideObstacleY = obstaclePositionY + .5;
+
+	if (obstaclePositionX < -10) {
+		obstaclePositionX = 10;
+		obstaclePositionY = -0.8 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.8 - (-0.8))));
+	}
 
 
 }
@@ -425,7 +465,7 @@ void SceneManager::setupCamera2D()
 void SceneManager::setupTexture()
 {
 
-	glGenTextures(5, texture);
+	glGenTextures(6, texture);
 
 	for (int i = 0; i < 5; i++) {
 
@@ -465,7 +505,7 @@ void SceneManager::setupTexture()
 		}
 
 		else {
-			data = stbi_load("../textures/obstaculo.png", &width, &height, &nrChannels, 0);
+			data = stbi_load("../textures/car.png", &width, &height, &nrChannels, 0);
 		}
 		
 		cout << "width: " << width << ", height: " << height << "\n";
