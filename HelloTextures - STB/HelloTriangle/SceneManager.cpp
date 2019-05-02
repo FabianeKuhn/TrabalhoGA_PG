@@ -6,7 +6,7 @@ static bool resized;
 static GLuint width, height;
 float xPosition = 0;
 float yPosition = 0;
-float velocity = 0.01;
+float velocity = 0.005;
 float roadPositions[] = {-2, -1, 0, 1, 2};
 float grassPositions[] = { -4, -3, -2, -1, 0, 1, 2, 3 };
 float treesPositions[] = {-7.5, -6.25 ,-5, -3.75, -2.5, -1.25, 0, 1.25, 2.5, 3.75, 5, 6.25, 7.5};
@@ -42,7 +42,7 @@ void SceneManager::initializeGraphics()
 	glfwInit();
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	window = glfwCreateWindow(width, height, "Lista 4", nullptr, nullptr);
+	window = glfwCreateWindow(width, height, "Trabalho GA", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 
 	// Set the required callback functions
@@ -162,9 +162,10 @@ void SceneManager::render()
 	drawGrassRoad(transform);
 	drawRoad(transform);
 	drawTrees(transform);
+	drawBird(transform);
 	drawCar(transform);
-	//drawBird(transform);		//nao funcional ainda
 	drawObstacle(transform);
+
 }
 
 void SceneManager::drawObstacle(glm::mat4 transform) {
@@ -294,7 +295,7 @@ void SceneManager::drawBird(glm::mat4 transform) {
 	// Bind Textures using texture units
 
 	glBindTexture(GL_TEXTURE_2D, texture[4]);
-	glUniform1f(glGetUniformLocation(shader->Program, "offsetx"), 0.7);
+	//glUniform1f(glGetUniformLocation(shader->Program, "offsetx"), 0.7);
 	glUniform1i(glGetUniformLocation(shader->Program, "ourTexture1"), 0);
 
 	transform = updateTransform(birdPosition, 2, 0.0f, 0.25f);
@@ -501,7 +502,7 @@ void SceneManager::setupTexture()
 		}
 
 		else if (i == 4){
-			data = stbi_load("../textures/bird2.png", &width, &height, &nrChannels, 0);
+			data = stbi_load("../textures/birdflying.png", &width, &height, &nrChannels, 0);
 		}
 
 		else {
