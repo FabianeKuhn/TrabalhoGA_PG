@@ -119,23 +119,29 @@ void SceneManager::endGame() {
 
 }
 
-
-
 void SceneManager::do_movement()
 {
-	//Se apertou esc ou o jogo finalizou por colisão
-	if (keys[GLFW_KEY_ESCAPE] || endgame)
-		glfwSetWindowShouldClose(window, GL_TRUE);
+	//Se apertou esc (
+	if (keys[GLFW_KEY_ESCAPE])
+	glfwSetWindowShouldClose(window, GL_TRUE);
 
 	//Tecla para mover o carro para cima
 	if (keys[GLFW_KEY_UP] || keys[GLFW_KEY_W]) {
+		if(endgame) {
+			glfwSetWindowShouldClose(window, GL_TRUE);
+		}
+
 		if (yPosition + 0.1 <= 2)
 			yPosition += 0.1;
 	}
 	//Tecla para mover o carro para baixo
-	if (keys[GLFW_KEY_DOWN] || keys[GLFW_KEY_S])
+	if (keys[GLFW_KEY_DOWN] || keys[GLFW_KEY_S]) {
+		if(endgame) {
+			glfwSetWindowShouldClose(window, GL_TRUE);
+		}
 		if (yPosition - 0.1 >= -2)
 			yPosition -= 0.1;
+	}
 }
 
 void SceneManager::render()
@@ -177,6 +183,7 @@ void SceneManager::render()
 
 	//Em caso de colisão, apresenta mensagem de fim de jogo
 	if (endgame) {
+		velocity = 0;
 		drawEndGame(transform);
 	}
 }
@@ -358,12 +365,13 @@ void SceneManager::drawBird(glm::mat4 transform) {
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-	birdPosition += 0.1;
+	if (!endgame) {
+		birdPosition += 0.1;
 
-	if (birdPosition >= 10) {
-		birdPosition = -5;
+		if (birdPosition >= 10) {
+			birdPosition = -5;
+		}
 	}
-
 
 }
 
