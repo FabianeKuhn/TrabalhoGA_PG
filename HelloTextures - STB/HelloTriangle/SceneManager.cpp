@@ -65,7 +65,7 @@ void SceneManager::initializeGraphics()
 	// Build and compile our shader program
 	addShader("../shaders/transformations.vs", "../shaders/transformations.frag");
 
-	//setup the scene -- LEMBRANDO QUE A DESCRIÇÃO DE UMA CENA PODE VIR DE ARQUIVO(S) DE 
+	//setup the scene 
 	// CONFIGURAÇÃO
 	setupScene();
 
@@ -112,19 +112,19 @@ void SceneManager::endGame() {
 
 void SceneManager::do_movement()
 {
+	//Se apertou esc ou o jogo finalizou por colisão
 	if (keys[GLFW_KEY_ESCAPE] || endgame)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 
+	//Tecla para mover o carro para cima
 	if (keys[GLFW_KEY_UP] || keys[GLFW_KEY_W]) {
 		if (yPosition + 0.1 <= 2)
 			yPosition += 0.1;
-
 	}
-	
+	//Tecla para mover o carro para baixo
 	if (keys[GLFW_KEY_DOWN] || keys[GLFW_KEY_S])
 		if (yPosition - 0.1 >= -2)
 			yPosition -= 0.1;
-	
 }
 
 void SceneManager::render()
@@ -156,7 +156,7 @@ void SceneManager::render()
 		resized = false;
 	}
 
-
+	//Desenha todo o cenário do jogo
 	drawGrassRoad(transform);
 	drawRoad(transform);
 	drawTrees(transform);
@@ -164,6 +164,7 @@ void SceneManager::render()
 	drawCar(transform);
 	drawObstacle(transform);
 
+	//Em caso de colisão, apresenta mensagem de fim de jogo
 	if (endgame) {
 		drawEndGame(transform);
 	}
@@ -176,7 +177,7 @@ void SceneManager::drawObstacle(glm::mat4 transform) {
 	// bind Texture
 	// Bind Textures using texture units
 
-	glBindTexture(GL_TEXTURE, texture[5]);
+	glBindTexture(GL_TEXTURE, texture[6]);
 	glUniform1i(glGetUniformLocation(shader->Program, "ourTexture1"), 0);
 	
 	glTexParameteri(GL_TEXTURE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -189,6 +190,7 @@ void SceneManager::drawObstacle(glm::mat4 transform) {
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+	//Calcula a posição dos carros obstáculo
 	obstaclePositionX -= velocity*10;
 	rightSideObstacleX = obstaclePositionX + 2;
 	leftSideObstacleX = obstaclePositionX + .5;
@@ -200,7 +202,6 @@ void SceneManager::drawObstacle(glm::mat4 transform) {
 		obstaclePositionY = -0.8 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.8 - (-0.8))));
 		passedCars++;
 	}
-
 
 }
 
@@ -222,6 +223,7 @@ void SceneManager::drawRoad(glm::mat4 transform){
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+		//Acerta a velocidade de movimentação da estrada
 		roadPositions[i] -= velocity;
 
 		if (roadPositions[i] < -2) {
@@ -389,8 +391,6 @@ glm::mat4 SceneManager::updateTransform(float x, float y, float z, float scale, 
 	transUpdate = glm::rotate(transUpdate, rotate, glm::vec3(0.0f, 0.0f, 1.0f));
 	transUpdate = glm::scale(transUpdate, glm::vec3(scale));
 	transUpdate = glm::translate(transUpdate, glm::vec3(x, y, z));
-
-	
 
 	return transUpdate;
 
