@@ -17,6 +17,7 @@ float leftSideObstacleX = obstaclePositionX;
 float rightSideObstacleX = obstaclePositionX + .5;
 float topSideObstacleY = obstaclePositionY;
 float bottomSideObstacleY = obstaclePositionX;
+int passedCars = 1;
 
 SceneManager::SceneManager()
 {
@@ -112,12 +113,6 @@ void SceneManager::do_movement()
 	if (keys[GLFW_KEY_ESCAPE])
 		glfwSetWindowShouldClose(window, GL_TRUE);
 
-//	if (keys[GLFW_KEY_RIGHT] || keys[GLFW_KEY_D])
-	//	xPosition += 0.0005;
-
-//	if (keys[GLFW_KEY_LEFT] || keys[GLFW_KEY_A])
-//		xPosition -= 0.0005;
-
 	if (keys[GLFW_KEY_UP] || keys[GLFW_KEY_W]) {
 		if (yPosition + 0.1 <= 2)
 			yPosition += 0.1;
@@ -197,6 +192,7 @@ void SceneManager::drawObstacle(glm::mat4 transform) {
 	if (obstaclePositionX < -10) {
 		obstaclePositionX = 10;
 		obstaclePositionY = -0.8 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.8 - (-0.8))));
+		passedCars++;
 	}
 
 
@@ -384,6 +380,11 @@ void SceneManager::run()
 
 		//Render scene
 		render();
+
+		if (passedCars % 3 == 0) {
+			velocity += 0.005;
+			passedCars = 1;
+		}
 		
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
