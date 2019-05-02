@@ -119,6 +119,8 @@ void SceneManager::endGame() {
 
 }
 
+
+
 void SceneManager::do_movement()
 {
 	//Se apertou esc ou o jogo finalizou por colisão
@@ -184,7 +186,8 @@ void SceneManager::drawObstacle(glm::mat4 transform) {
 	obstaclePositionX -= velocity * 10;
 	rightSideObstacleX = obstaclePositionX + 2;
 	leftSideObstacleX = obstaclePositionX + .5;
-
+	
+	//Calcula a posição dos carros obstáculo
 	if (obstaclePositionX < -10) {
 		obstaclePositionX = 10;
 		obstaclePositionY = -0.8 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.8 - (-0.8))));
@@ -215,19 +218,6 @@ void SceneManager::drawObstacle(glm::mat4 transform) {
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-
-	//Calcula a posição dos carros obstáculo
-	obstaclePositionX -= velocity*10;
-	rightSideObstacleX = obstaclePositionX + 2;
-	leftSideObstacleX = obstaclePositionX + .5;
-	bottomSideObstacleY = obstaclePositionY - .5;
-	topSideObstacleY = obstaclePositionY + .5;
-
-	if (obstaclePositionX < -10) {
-		obstaclePositionX = 10;
-		obstaclePositionY = -0.8 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.8 - (-0.8))));
-		passedCars++;
-	}
 
 }
 
@@ -280,6 +270,7 @@ void SceneManager::drawEndGame(glm::mat4 transform) {
 		// render container
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
 	}
 
 void SceneManager::drawGrassRoad(glm::mat4 transform)
