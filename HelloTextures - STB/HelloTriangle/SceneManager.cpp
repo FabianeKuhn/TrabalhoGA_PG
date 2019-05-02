@@ -18,6 +18,8 @@ float rightSideObstacleX = obstaclePositionX + .5;
 float topSideObstacleY = obstaclePositionY;
 float bottomSideObstacleY = obstaclePositionX;
 int passedCars = 1;
+bool endgame = false;
+
 
 SceneManager::SceneManager()
 {
@@ -103,25 +105,25 @@ void SceneManager::resize(GLFWwindow * window, int w, int h)
 void SceneManager::endGame() {
 
 	if (xPosition <= rightSideObstacleX && xPosition >= leftSideObstacleX && yPosition >= bottomSideObstacleY && yPosition <= topSideObstacleY) {
-		glfwSetWindowShouldClose(window, GL_TRUE);
+		endgame = true;
 	}
 
 }
 
 void SceneManager::do_movement()
 {
-	if (keys[GLFW_KEY_ESCAPE])
+	if (keys[GLFW_KEY_ESCAPE] || endgame)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 
 	if (keys[GLFW_KEY_UP] || keys[GLFW_KEY_W]) {
 		if (yPosition + 0.1 <= 2)
 			yPosition += 0.1;
+
 	}
 	
 	if (keys[GLFW_KEY_DOWN] || keys[GLFW_KEY_S])
 		if (yPosition - 0.1 >= -2)
 			yPosition -= 0.1;
-
 	
 }
 
@@ -154,6 +156,7 @@ void SceneManager::render()
 		resized = false;
 	}
 
+
 	drawGrassRoad(transform);
 	drawRoad(transform);
 	drawTrees(transform);
@@ -161,6 +164,9 @@ void SceneManager::render()
 	drawCar(transform);
 	drawObstacle(transform);
 
+	if (endgame) {
+		drawEndGame(transform);
+	}
 }
 
 void SceneManager::drawObstacle(glm::mat4 transform) {
@@ -226,6 +232,29 @@ void SceneManager::drawRoad(glm::mat4 transform){
 
 }
 
+
+void SceneManager::drawEndGame(glm::mat4 transform) {
+	
+		GLint modelLoc;
+
+		// bind Texture
+		// Bind Textures using texture units
+
+		glBindTexture(GL_TEXTURE_2D, texture[5]);
+		glUniform1i(glGetUniformLocation(shader->Program, "ourTexture1"), 0);
+
+
+		transform = updateTransform(0, 0, 0.0f, 0.8f);
+
+		modelLoc = glGetUniformLocation(shader->Program, "model");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+		// render container
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+	}
+
 void SceneManager::drawGrassRoad(glm::mat4 transform)
 {
 	GLint modelLoc;
@@ -272,6 +301,7 @@ void SceneManager::drawCar(glm::mat4 transform) {
 
 	glBindTexture(GL_TEXTURE_2D, texture[3]);
 	glUniform1i(glGetUniformLocation(shader->Program, "ourTexture1"), 0);
+
 
 	transform = updateTransform(-2.5, yPosition, 0.0f, 0.25f);
 
@@ -467,9 +497,9 @@ void SceneManager::setupCamera2D()
 void SceneManager::setupTexture()
 {
 
-	glGenTextures(6, texture);
+	glGenTextures(7, texture);
 
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < 6; i++) {
 
 		// load and create a texture 
 		// -------------------------
@@ -489,7 +519,7 @@ void SceneManager::setupTexture()
 		if (i == 0) {
 			data = stbi_load("../textures/tree.png", &width, &height, &nrChannels, 0);
 		}
-	
+
 		else if (i == 1) {
 			data = stbi_load("../textures/grass.png", &width, &height, &nrChannels, 0);
 		}
@@ -497,16 +527,18 @@ void SceneManager::setupTexture()
 		else if (i == 2) {
 			data = stbi_load("../textures/road.png", &width, &height, &nrChannels, 0);
 		}
-		
-		else if (i == 3){
+
+		else if (i == 3) {
 			data = stbi_load("../textures/car.png", &width, &height, &nrChannels, 0);
 		}
 
-		else if (i == 4){
+		else if (i == 4) {
 			data = stbi_load("../textures/birdflying.png", &width, &height, &nrChannels, 0);
 		}
-
-		else {
+		else if (i == 5) {
+			data = stbi_load("../textures/you_died.png", &width, &height, &nrChannels, 0);
+		}
+		else  {
 			data = stbi_load("../textures/car.png", &width, &height, &nrChannels, 0);
 		}
 		
