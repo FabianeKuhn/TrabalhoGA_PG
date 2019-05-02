@@ -1,7 +1,7 @@
 /* Hello Transforms - código inicial fornecido em https://learnopengl.com/#!Getting-started/Hello-Triangle 
  *
  * Adaptado por Rossana Baptista Queiroz
- * Lista 4 - Fabiane Kuhn
+ * Trabalho do Grau A
  * para a disciplina de Processamento Gráfico
  * Versão inicial: 30/05/2019
  * Última atualização em 30/05/2019
