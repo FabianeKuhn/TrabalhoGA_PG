@@ -19,6 +19,8 @@ float bottomSideObstacleY = obstaclePositionY - .5;
 float topSideObstacleY = obstaclePositionY + .5;
 int passedCars = 1;
 bool endgame = false;
+int totalCars = 0;
+bool win = false;
 
 
 SceneManager::SceneManager()
@@ -127,7 +129,7 @@ void SceneManager::do_movement()
 
 	//Tecla para mover o carro para cima
 	if (keys[GLFW_KEY_UP] || keys[GLFW_KEY_W]) {
-		if(endgame) {
+		if(endgame || win) {
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
 
@@ -136,7 +138,7 @@ void SceneManager::do_movement()
 	}
 	//Tecla para mover o carro para baixo
 	if (keys[GLFW_KEY_DOWN] || keys[GLFW_KEY_S]) {
-		if(endgame) {
+		if(endgame || win) {
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
 		if (yPosition - 0.1 >= -2)
@@ -186,6 +188,12 @@ void SceneManager::render()
 		velocity = 0;
 		drawEndGame(transform);
 	}
+
+	if (totalCars >= 6) {
+		velocity = 0;
+		win = true;
+		drawWin(transform);
+	}
 }
 
 void SceneManager::drawObstacle(glm::mat4 transform) {
@@ -205,6 +213,7 @@ void SceneManager::drawObstacle(glm::mat4 transform) {
 		cout << "Bottom obstacle " << bottomSideObstacleY << "\n";
 		cout << "Top obstacle " << topSideObstacleY << "\n";
 		cout << "y normal car " << yPosition << "\n";
+		totalCars++;
 	}
 
 	GLint modelLoc;
@@ -279,6 +288,28 @@ void SceneManager::drawEndGame(glm::mat4 transform) {
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 	}
+
+void SceneManager::drawWin(glm::mat4 transform) {
+
+	GLint modelLoc;
+
+	// bind Texture
+	// Bind Textures using texture units
+
+	glBindTexture(GL_TEXTURE_2D, texture[6]);
+	glUniform1i(glGetUniformLocation(shader->Program, "ourTexture1"), 0);
+
+
+	transform = updateTransform(0, 0, 0.0f, 0.8f);
+
+	modelLoc = glGetUniformLocation(shader->Program, "model");
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+	// render container
+	glBindVertexArray(VAO);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	
+}
 
 void SceneManager::drawGrassRoad(glm::mat4 transform)
 {
@@ -365,7 +396,7 @@ void SceneManager::drawBird(glm::mat4 transform) {
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-	if (!endgame) {
+	if (!endgame && velocity > 0) {
 		birdPosition += 0.1;
 
 		if (birdPosition >= 10) {
@@ -528,9 +559,9 @@ void SceneManager::setupCamera2D()
 void SceneManager::setupTexture()
 {
 
-	glGenTextures(7, texture);
+	glGenTextures(8, texture);
 
-	for (int i = 0; i < 6; i++) {
+	for (int i = 0; i < 7; i++) {
 
 		// load and create a texture 
 		// -------------------------
@@ -568,6 +599,9 @@ void SceneManager::setupTexture()
 		}
 		else if (i == 5) {
 			data = stbi_load("../textures/you_died.png", &width, &height, &nrChannels, 0);
+		}
+		else if (i == 6) {
+			data = stbi_load("../textures/win.png", &width, &height, &nrChannels, 0);
 		}
 		else  {
 			data = stbi_load("../textures/car.png", &width, &height, &nrChannels, 0);
